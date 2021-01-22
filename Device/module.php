@@ -1,4 +1,4 @@
-<?php
+<<?php
 
 declare(strict_types=1);
 
@@ -24,12 +24,18 @@ class Zigbee2TasmotaDevice extends Devices
 
         $this->RegisterPropertyBoolean('showbattery', false);
         $this->RegisterPropertyBoolean('showlinkquality', false);
+
+        $this->RegisterPropertyInteger('CustomDefinitionID', 0);
+        $this->RegisterPropertyInteger('CustomEventScriptID', 0);
+        
     }
 
     public function ApplyChanges()
     {
         //Never delete this line!
         parent::ApplyChanges();
+
+        $this->addCustomDefinition();
 
         //Setze Filter für ReceiveData
         $device = $this->ReadPropertyString('Device');
@@ -73,6 +79,8 @@ class Zigbee2TasmotaDevice extends Devices
 
     public function ReceiveData($JSONString)
     {
+        $this->addCustomDefinition();
+
         $device = $this->ReadPropertyString('Device');
         $this->SendDebug('ReceiveData', $JSONString, 0);
         if (!empty($this->ReadPropertyString('Device'))) {
@@ -206,6 +214,8 @@ class Zigbee2TasmotaDevice extends Devices
 
     public function RequestAction($Ident, $Value)
     {
+        $this->addCustomDefinition();
+
         $model = $this->ReadPropertyString('Model');
         $Command = $this->Devices[$model][$Ident]['ActionCommand'];
         $Action = $this->Devices[$model][$Ident]['Action'];
@@ -380,5 +390,19 @@ class Zigbee2TasmotaDevice extends Devices
         IPS_SetVariableProfileIcon('T2M.Intensity.254', 'Intensity');
         IPS_SetVariableProfileText('T2M.Intensity.254', '', ' %');
         IPS_SetVariableProfileValues('T2M.Intensity.254', 1, 254, 1);
+    }
+
+    private function addCustomDefinition()
+    {
+        // Bei einem definierten Custom Definition Script dieses zum Device Array mergen
+        $CustomDefinitionID = $this->ReadPropertyInteger('CustomDefinitionID');
+        if($CustomDefinitionID != 0)
+        {
+            $this->SendDebug('Usage of Custom Zigbee Configuration', IPS_GetScriptFile($CustomDefinitionID), 0);
+            $this->Devices = array_merge(
+                $this->Devices, 
+                include(IPS_GetKernelDir() . "/Scripts/" . IPS_GetScriptFile($CustomDefinitionID))
+            );
+        }
     }
 }
