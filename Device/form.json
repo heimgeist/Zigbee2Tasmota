@@ -8,7 +8,10 @@
         "caption": "Expert settings",
         "items": [
           { "type": "CheckBox", "name": "showbattery", "caption": "Show Battery" },
-          { "type": "CheckBox", "name": "showlinkquality", "caption": "Show Link Quality" }
+          { "type": "CheckBox", "name": "showlinkquality", "caption": "Show Link Quality" },
+          { "type": "SelectScript", "name": "CustomDefinitionID", "caption": "Custom Zigbee Configuration" },
+          { "type": "SelectScript", "name": "CustomEventScriptID", "caption": "Custom EventHandler Script" }
+
         ]
     }
     ]
